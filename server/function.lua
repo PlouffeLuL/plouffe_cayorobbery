@@ -41,11 +41,11 @@ function Cyr:CreateAllFrames()
         local paintingModel = joaat(v.model)
 
         local paintingEntity = CreateObject(paintingModel, v.paintingCoords.x, v.paintingCoords.y, v.paintingCoords.z, true, true, false)
-        
+
         while not DoesEntityExist(paintingEntity) and os.time() - init < 5 do
             Wait(0)
         end
-        
+
         if DoesEntityExist(paintingEntity) then
             FreezeEntityPosition(paintingEntity, true)
             SetEntityRotation(paintingEntity, v.paintingRotation.x, v.paintingRotation.y, v.paintingRotation.z, 2, true)
@@ -71,7 +71,7 @@ function Cyr:DeleteAllFrames()
         if v.frameNetId then
             local frameEntity = NetworkGetEntityFromNetworkId(v.frameNetId)
             v.frameNetId = nil
-            
+
             DeleteEntity(frameEntity)
         end
 
@@ -93,7 +93,7 @@ function Cyr:PlayerRobbedPainting(playerId, netId)
             local paintingEntity = NetworkGetEntityFromNetworkId(v.paintingNetId)
             DeleteEntity(paintingEntity)
             v.paintingNetId = nil
-            
+
             local one, two = v.model:find("prop_")
             local itemName = v.model:sub(two + 1,v.model:len())
 
@@ -103,7 +103,7 @@ function Cyr:PlayerRobbedPainting(playerId, netId)
                 GlobalState.cayoRobberyState = "Finished"
             end
             break
-        end            
+        end
     end
 end
 
@@ -112,11 +112,11 @@ function Cyr:CreateDiamond()
     local data = self.Diamond
 
     local displayEntity = CreateObject(joaat(data.display), data.displayCoords.x, data.displayCoords.y, data.displayCoords.z, true, true, false)
-    
+
     while not DoesEntityExist(displayEntity) and os.time() - init < 5 do
         Wait(0)
     end
-    
+
     if DoesEntityExist(displayEntity) then
         FreezeEntityPosition(displayEntity, true)
         SetEntityRotation(displayEntity, data.displayRotation.x, data.displayRotation.y, data.displayRotation.z, 2, true)
@@ -140,7 +140,7 @@ function Cyr:RemoveDiamond()
     if self.Diamond.displayNetId then
         local displayEntity = NetworkGetEntityFromNetworkId(self.Diamond.displayNetId)
         self.Diamond.displayNetId = nil
-        
+
         DeleteEntity(displayEntity)
     end
 
@@ -159,7 +159,7 @@ function Cyr:PlayerLootedDiamond(playerId, netId)
     if self.Diamond.diamondNetId and self.Diamond.diamondNetId == netId then
         local displayEntity = NetworkGetEntityFromNetworkId(self.Diamond.diamondNetId)
         self.Diamond.diamondNetId = nil
-        
+
         DeleteEntity(displayEntity)
 
         exports.ox_inventory:AddItem(playerId, "huge_diamond", 1)
@@ -207,7 +207,7 @@ end
 
 function Cyr:StartRobbery()
     local startTime = os.time()
-    
+
     if GlobalState.cayoRobberyState ~= "Ready" then
         return false, ("Déjà volée")
     end
@@ -217,7 +217,7 @@ function Cyr:StartRobbery()
     if not cops or Utils:TableLen(cops) < 6 then
         return false, ("Il n'y a pas asser de policier en service présentement")
     end
-        
+
     self:RelockAllDoors()
     self:SetUpKeys()
     self:CreateAllFrames()
@@ -226,8 +226,8 @@ function Cyr:StartRobbery()
 
     CreateThread(function()
         local sleepTimer = 1000 * 30
-        
-        while os.time() - startTime < timeToRob and GlobalState.cayoRobberyState == "Started" and self:IsAnyEntityNotLooted() do    
+
+        while os.time() - startTime < timeToRob and GlobalState.cayoRobberyState == "Started" and self:IsAnyEntityNotLooted() do
             Wait(sleepTimer)
         end
 
@@ -251,14 +251,14 @@ function Cyr:SetUpKeys()
     for k,v in pairs(self.KeysMeta) do
         local len = Utils:TableLen(self.HiddenZones)
         local randi = math.random(1, len)
-        
+
         repeat
             randi = math.random(1, len)
         until not usedRandi[randi]
-        
+
         usedRandi[randi] = true
 
-        local keyString = ("cyr_hidden_key_%s"):format(randi) 
+        local keyString = ("cyr_hidden_key_%s"):format(randi)
 
         keyZones[keyString] = k
     end
@@ -289,7 +289,7 @@ function Cyr:GetPlayersInMansion(amount)
 
             if distance < 150 then
                 retval[#retval + 1] = v
-                
+
                 if #retval == amount then
                     return retval
                 end
@@ -302,7 +302,7 @@ end
 
 function Cyr:CreateAllGuards()
     local players = self:GetPlayersInMansion(1)
-    
+
     if not players[1] then
         return
     end
@@ -328,10 +328,10 @@ end
 function Cyr:DeleteAllGuards()
     for k,v in pairs(activePeds) do
         local ped = NetworkGetEntityFromNetworkId(v)
-        
+
         if DoesEntityExist(ped) then
             DeleteEntity(ped)
-        end    
+        end
     end
 end
 
@@ -343,7 +343,7 @@ function Cyr:PlayerThermalGate(playerId, success, doorIndex)
     if not success then
         return
     end
-    
+
     exports.plouffe_doorlock:UpdateDoorStateTable(Cyr.Doors.Thermal[doorIndex], false)
 end
 
