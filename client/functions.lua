@@ -1,4 +1,7 @@
 local Utils = exports.plouffe_lib:Get("Utils")
+local Lang = exports.plouffe_lib:Get("Lang")
+local Interface = exports.plouffe_lib:Get("Interface")
+
 local Animation = {
     Cutting = {dict = "anim@scripted@heist@ig16_glass_cut@male@", ptfxAsset = "scr_ih_fin", ptfx = {}},
     Art = {dict = "ANIM_HEIST@HS3F@IG11_STEAL_PAINTING@MALE@"},
@@ -68,27 +71,60 @@ local aiPeds = nil
 function Cyr:Start()
     self:ExportAllZones()
     self:RegisterEvents()
-end
 
-function Cyr:ExportAllZones()
-    for k,v in pairs(self.Zones) do
-        local registered, reason = exports.plouffe_lib:Register(v)
-    end
+    if GetConvar("plouffe_cayorobbery:qtarget", "") == "true" then
+        if GetResourceState("qtarget") ~= "missing" then
+            local breakCount = 0
+            while GetResourceState("qtarget") ~= "started" and breakCount < 30 do
+                breakCount += 1
+                Wait(1000)
+            end
 
-    if GlobalState.cayoRobberyState == "Started" then
-        for k,v in pairs(Cyr.HiddenZones) do
-            local registered, reason = exports.plouffe_lib:Register(v)
+            if GetResourceState("qtarget") ~= "started" then
+                return
+            end
+
+            exports.qtarget:AddTargetModel({
+                joaat("h4_prop_h4_painting_01a"),
+                joaat("h4_prop_h4_painting_01b"),
+                joaat("h4_prop_h4_painting_01c"),
+                joaat("h4_prop_h4_painting_01d"),
+                joaat("h4_prop_h4_painting_01e"),
+                joaat("h4_prop_h4_painting_01f"),
+                joaat("h4_prop_h4_painting_01g"),
+                joaat("h4_prop_h4_painting_01h"),
+                joaat("ch_prop_vault_painting_01a"),
+                joaat("ch_prop_vault_painting_01b"),
+                joaat("ch_prop_vault_painting_01c"),
+                joaat("ch_prop_vault_painting_01d"),
+                joaat("ch_prop_vault_painting_01e"),
+                joaat("ch_prop_vault_painting_01f"),
+                joaat("ch_prop_vault_painting_01g"),
+                joaat("ch_prop_vault_painting_01h"),
+                joaat("ch_prop_vault_painting_01i"),
+                joaat("ch_prop_vault_painting_01j")
+            },{
+                distance = 1.5,
+                options = {
+                    {
+                        icon = 'fas fa-info',
+                        label = Lang.bank_tryLoot,
+                        action = self.RobArt
+                    },
+                    {
+                        icon = 'fas fa-viruses',
+                        label = Lang.bank_tryDestroy,
+                        action = self.DestroyArt
+                    }
+                }
+            })
         end
     end
-end
--- @Todo Add destroys
-function Cyr:RegisterEvents()
-    RegisterNetEvent("plouffe_lib:inVehicle", function(inVehicle, vehicle)
-        self.Utils.inVehicle = inVehicle
-        self.Utils.vehicle = vehicle
-    end)
 
-    RegisterNetEvent("plouffe_cayorobbery:setGuardsTasks", self.UpdateGuardTask)
+end
+
+function Cyr:RegisterEvents()
+    Utils:RegisterNetEvent("plouffe_cayorobbery:setGuardsTasks", self.UpdateGuardTask)
 
     AddEventHandler("plouffe_cayorobbery:onZone", function(params)
         if self[params.fnc] then
@@ -102,16 +138,22 @@ function Cyr:RegisterEvents()
     AddEventHandler("plouffe_cayorobbery:exitMansion", self.ExitMansion)
 
     AddEventHandler("plouffe_cayorobbery:RobPainting", self.RobArt)
-    -- AddEventHandler("plouffe_cayorobbery:DestroyPainting", self.DestroyArt)
+    AddEventHandler("plouffe_cayorobbery:DestroyPainting", self.DestroyArt)
 
     AddEventHandler("plouffe_cayorobbery:RobJewel", self.RobJewel)
-    -- AddEventHandler("plouffe_cayorobbery:DestroyJewel", self.DestroyJewel)
+    AddEventHandler("plouffe_cayorobbery:DestroyJewel", self.DestroyJewel)
 end
 
-function Cyr:GetItemCount(item)
-    local count = exports.ox_inventory:Search(2, item)
-    count = count and count or 0
-    return count, item
+function Cyr:ExportAllZones()
+    for k,v in pairs(self.Zones) do
+        local registered, reason = exports.plouffe_lib:Register(v)
+    end
+
+    if GlobalState.cayoRobberyState == "Started" then
+        for k,v in pairs(Cyr.HiddenZones) do
+            local registered, reason = exports.plouffe_lib:Register(v)
+        end
+    end
 end
 
 function Cyr.HandleState(bagName,key,value,reserved,replicated)
@@ -165,9 +207,8 @@ function Cyr:GetClosestAi()
 end
 
 function Cyr:SearchKey(params)
-    if Utils:ProgressCircle({
+    if Interface.Progress.Circle({
         duration = 7500,
-        position = "bottom",
         useWhileDead = false,
         canCancel = false,
         disable = {
@@ -184,23 +225,6 @@ function Cyr:SearchKey(params)
         TriggerServerEvent("plouffe_cayorobbery:lootkey", params.zone, Cyr.Utils.MyAuthKey)
     end
 end
-
-function Cyr.TryUnlockDoor(data)
-    if GlobalState.cayoRobberyState ~= "Started" then
-        return
-    end
-
-    local zoneName = ("%s_%s"):format(data.metadata.door, 1)
-
-    if not exports.plouffe_lib:IsInZone(zoneName) then
-        return Utils:Notify("Cette clé ne semble pas fonctionner ici")
-    end
-
-    TriggerServerEvent("plouffe_cayorobbery:unlockDoor", data.metadata.door, Cyr.Utils.MyAuthKey)
-
-    Utils:PlayAnim(1000, "anim@mp_player_intmenu@key_fob@","fob_click",48,2.0, 2.0, 500)
-end
-exports("TryUnlockDoor", Cyr.TryUnlockDoor)
 
 function Cyr.InMansion()
     Cyr.inMansion = true
@@ -240,190 +264,6 @@ function Cyr.GetDoorIndex(key)
     return nil
 end
 
-function Cyr.TryElevatorHack()
-    if not exports.plouffe_lib:IsInZone("cayo_mansion_office_elevator_1") or GlobalState.cayoRobberyState ~= "Started" then
-        return
-    end
-
-    local Hack = Animation.Laptop:Start()
-
-    if not Hack then
-        return false
-    end
-
-    Hack:Loop()
-
-    local success = exports.varhack:start(7, 5)
-
-    TriggerServerEvent("plouffe_cayorobbery:hacked_elevator", success, Cyr.Utils.MyAuthKey)
-
-    Hack:Exit()
-end
-exports("TryElevatorHack", Cyr.TryElevatorHack)
-
-function Cyr.TryHack()
-    if Cyr:GetItemCount("usb_black") < 1 or Cyr:GetItemCount("burner_phone") < 1 then
-        return
-    end
-
-    local doorIndex = Cyr.GetDoorIndex("Hack")
-
-    if not doorIndex then
-        return
-    end
-
-    local hours = GetClockHours()
-
-    if hours > 5 and hours < 20 then
-        return Utils:Notify("Vous devez attendre la nuit")
-    end
-
-    local Hack = Animation.Hack:Start()
-
-    if not Hack then
-        return
-    end
-
-    local success = exports.varhack:start(7, 6)
-
-    if not success then
-        return Hack:Failed()
-    end
-
-    if GlobalState.cayoRobberyState == "Ready" then
-        exports.plouffe_dispatch:SendAlert("10-90 F")
-    end
-
-    Hack:Succes()
-
-    TriggerServerEvent("plouffe_cayorobbery:doorHacked", doorIndex, "Hack", Cyr.Utils.MyAuthKey)
-end
-exports("TryHack", Cyr.TryHack)
-
-function Cyr.RobJewel()
-    if GlobalState.cayoRobberyState ~= "Started" then
-        return
-    end
-
-    if Cyr:GetItemCount("thermal_glass_cutter") < 1 then
-        return
-    end
-
-    local Cutting = Animation.Cutting:Enter()
-    local fails = 0
-    local wins = 0
-
-    if not Cutting then
-        return
-    end
-
-    repeat
-        Utils:ProgressCircle({
-            duration = 10000,
-            position = "bottom",
-            useWhileDead = false,
-            canCancel = false,
-            disable = {
-                move = true,
-                car = true,
-                combat = true
-            }
-        })
-
-        local succes = false
-        local randi = math.random(1,2)
-
-        if randi == 1 then
-            succes = exports.memorygame:start(3, 3, 3, 20)
-        elseif randi == 2 then
-            succes = exports.icon_memory:start(2, 4000)
-        end
-
-        if not succes then
-            fails = fails + 1
-            wins = 0
-            Cutting:Overheat()
-        else
-            wins = wins + 1
-        end
-
-        Wait(1000)
-    until fails >= 3 or wins >= 3
-
-    if fails >= 3 then
-        return Cutting:Failed()
-    end
-
-    Cutting:Success()
-end
-exports("RobJewel", Cyr.RobJewel)
-
-function Cyr.TryThermal()
-    if GlobalState.cayoRobberyState ~= "Started" then
-        return
-    end
-
-    local door = Cyr.GetDoorIndex("Thermal")
-
-    if not door then
-        return
-    end
-
-    local Thermal = Animation.Thermal:Start()
-
-    if not Thermal then
-        return
-    end
-
-    TriggerServerEvent("plouffe_cayorobbery:removeItem", "thermal_charge", 1, Cyr.Utils.MyAuthKey)
-
-    local succes = exports.icon_memory:start(4, 4000)
-
-    if not succes then
-        return Thermal:Finished()
-    end
-
-    Thermal:Succes()
-
-    TriggerServerEvent("plouffe_cayorobbery:gate_thermal", succes, door, Cyr.Utils.MyAuthKey)
-end
-exports("TryThermal", Cyr.TryThermal)
-
-function Cyr.RobArt()
-    if GlobalState.cayoRobberyState ~= "Started" then
-        return
-    end
-
-    if Cyr:GetItemCount("WEAPON_SWITCHBLADE") < 1 then
-        return Utils:Notify("Vous avez besoin d'une switch blade pour cela")
-    end
-
-    local Art = Animation.Art:Enter()
-    local steps = {"One", "Two", "Three", "Four"}
-    local currentStep = 1
-
-    if not Art then
-        return
-    end
-
-    repeat
-        local succes = exports.roundbar:Start(1, 5)
-
-        Wait(0)
-        if succes then
-            Art[steps[currentStep]](Art)
-            currentStep = currentStep + 1
-        end
-
-    until currentStep > #steps or not succes
-
-    if currentStep <= #steps then
-        return Art:Failed()
-    end
-
-    Art:Succes()
-end
-
 function Cyr:GetAnimVersion(coords)
     for k,v in pairs(Cyr.Art.coords) do
         if #(coords - v.frameCoords) < 3.0 then
@@ -452,6 +292,320 @@ function Cyr:GetClosestFrame(pedCoords)
         end
     end
 end
+
+function Cyr.RobArt()
+    if GlobalState.cayoRobberyState ~= "Started" then
+        return
+    end
+
+    if Utils:GetItemCount("WEAPON_SWITCHBLADE") < 1 then
+        return Interface.Notifications.Show({
+            style = "error",
+            header = "Cayo heist",
+            message = Lang.cayoheist_needSwitchBlade
+        })
+    end
+
+    local Art = Animation.Art:Enter()
+    local steps = {"One", "Two", "Three", "Four"}
+    local currentStep = 1
+
+    if not Art then
+        return
+    end
+
+    repeat
+        local succes = Interface.Lockpick.New({
+            amount = 0,
+            range = 25,
+            maxKeys = 4
+        })
+
+        Wait(0)
+        if succes then
+            Art[steps[currentStep]](Art)
+            currentStep = currentStep + 1
+        end
+
+    until currentStep > #steps or not succes
+
+    if currentStep <= #steps then
+        return Art:Failed()
+    end
+
+    Art:Succes()
+end
+exports("RobArt", Cyr.RobArt)
+
+function Cyr.DestroyArt()
+    local finished = Interface.Progress.Circle({
+        duration = 10000,
+
+        useWhileDead = false,
+        canCancel = true,
+        disable = {
+            move = true,
+            car = true,
+            combat = true
+        }
+    })
+
+    if not finished then
+        return
+    end
+
+    local entity = Cyr:GetClosestPainting(GetEntityCoords(PlayerPedId()))
+
+    TriggerServerEvent("plouffe_cayorobbery:destroyPainting", NetworkGetNetworkIdFromEntity(entity), Cyr.Utils.MyAuthKey)
+end
+exports("DestroyArt", Cyr.DestroyArt)
+
+function Cyr.DestroyJewel()
+    local finished = Interface.Progress.Circle({
+        duration = 10000,
+
+        useWhileDead = false,
+        canCancel = true,
+        disable = {
+            move = true,
+            car = true,
+            combat = true
+        }
+    })
+
+    if not finished then
+        return
+    end
+
+    local pedCoords = GetEntityCoords(PlayerPedId())
+    local diamondEntity = GetClosestObjectOfType(pedCoords.x, pedCoords.y, pedCoords.z, 2.0, joaat(Cyr.Diamond.model), false, false, false)
+    local diamondEntityNetId = NetworkGetNetworkIdFromEntity(diamondEntity)
+
+    TriggerServerEvent("plouffe_cayorobbery:destroyJewel", diamondEntityNetId, Cyr.Utils.MyAuthKey)
+end
+exports("DestroyJewel", Cyr.DestroyJewel)
+
+function Cyr.TryThermal()
+    if GlobalState.cayoRobberyState ~= "Started" then
+        return
+    end
+
+    local door = Cyr.GetDoorIndex("Thermal")
+
+    if not door then
+        return
+    end
+
+    local Thermal = Animation.Thermal:Start()
+
+    if not Thermal then
+        return
+    end
+
+    TriggerServerEvent("plouffe_cayorobbery:removeItem", Cyr.thermalItem, 1, Cyr.Utils.MyAuthKey)
+
+    local succes = Interface.Lines.New({
+        time = 25,
+        maxMoves = 8,
+        points = 15
+    })
+
+    if not succes then
+        return Thermal:Finished()
+    end
+
+    Thermal:Succes()
+
+    TriggerServerEvent("plouffe_cayorobbery:gate_thermal", succes, door, Cyr.Utils.MyAuthKey)
+end
+exports("TryThermal", Cyr.TryThermal)
+
+function Cyr.RobJewel()
+    if GlobalState.cayoRobberyState ~= "Started" then
+        return
+    end
+
+    if Utils:GetItemCount(Cyr.glassCutterItem) < 1 then
+        return
+    end
+
+    local Cutting = Animation.Cutting:Enter()
+    local fails = 0
+    local wins = 0
+
+    if not Cutting then
+        return
+    end
+
+    repeat
+        Interface.Progress.Circle({
+            duration = 10000,
+
+            useWhileDead = false,
+            canCancel = false,
+            disable = {
+                move = true,
+                car = true,
+                combat = true
+            }
+        })
+
+        local succes = false
+        local randi = math.random(1,2)
+
+        if randi == 1 then
+            succes = Interface.MemorySquares.New({
+                time = 20,
+                amount = 8,
+                solutionAmount = 5,
+                errors = 1,
+                delay = 2
+            })
+        elseif randi == 2 then
+            succes = Interface.MemorySquares.New({
+                time = 20,
+                amount = 16,
+                solutionAmount = 4,
+                errors = 1,
+                delay = 2
+            })
+        end
+
+        if not succes then
+            fails = fails + 1
+            wins = 0
+            Cutting:Overheat()
+        else
+            wins = wins + 1
+        end
+
+        Wait(1000)
+    until fails >= 3 or wins >= 3
+
+    if fails >= 3 then
+        return Cutting:Failed()
+    end
+
+    Cutting:Success()
+end
+exports("RobJewel", Cyr.RobJewel)
+
+function Cyr.TryElevatorHack()
+    if not exports.plouffe_lib:IsInZone("cayo_mansion_office_elevator_1") or GlobalState.cayoRobberyState ~= "Started" then
+        return
+    end
+
+    local Hack = Animation.Laptop:Start()
+
+    if not Hack then
+        return false
+    end
+
+    Hack:Loop()
+
+    local success = Interface.MovingSquare.New({
+        time = 20,
+        amount = 4,
+        errors = 1,
+        delay = 2
+    })
+
+    TriggerServerEvent("plouffe_cayorobbery:hacked_elevator", success, Cyr.Utils.MyAuthKey)
+
+    Hack:Exit()
+end
+exports("TryElevatorHack", Cyr.TryElevatorHack)
+
+function Cyr.TryHack()
+    if Utils:GetItemCount(Cyr.hackItem) < 1 then
+        return
+    end
+
+    local doorIndex = Cyr.GetDoorIndex("Hack")
+
+    if not doorIndex then
+        return
+    end
+
+    local hours = GetClockHours()
+
+    if hours > 5 and hours < 20 then
+        return Interface.Notifications.Show({
+            style = "error",
+            header = "Cayo heist",
+            message = Lang.cayoheist_waitNight
+        })
+    end
+
+    local Hack = Animation.Hack:Start()
+
+    if not Hack then
+        return
+    end
+
+    local success = Interface.MovingSquare.New({
+        time = 25,
+        amount = 4,
+        errors = 1,
+        delay = 4
+    })
+
+    if not success then
+        return Hack:Failed()
+    end
+
+    if GlobalState.cayoRobberyState == "Ready" and GetResourceState("plouffe_dispatch") == "started" then
+        exports.plouffe_dispatch:SendAlert("10-90 F")
+    end
+
+    Hack:Succes()
+
+    TriggerServerEvent("plouffe_cayorobbery:doorHacked", doorIndex, "Hack", Cyr.Utils.MyAuthKey)
+end
+exports("TryHack", Cyr.TryHack)
+
+function Cyr.TryUnlockDoor(data)
+    if GlobalState.cayoRobberyState ~= "Started" then
+        return
+    end
+
+    local door
+
+    if Cyr.inventoryConfig == "ox" then
+        local zoneName = ("%s_%s"):format(data.metadata.door, 1)
+
+        if not exports.plouffe_lib:IsInZone(zoneName) then
+            return Interface.Notifications.Show({
+                style = "error",
+                header = "Cayo heist",
+                message = Lang.cayoheist_wrongKey
+            })
+        end
+
+        door = data.metadata.door
+    else
+        for k,v in pairs(Cyr.Doors.Houses) do
+            local name = ("%s_%s"):format(k, 1)
+            if exports.plouffe_lib:IsInZone(name) then
+                door = k
+                break
+            end
+        end
+
+        if not door then
+            return Interface.Notifications.Show({
+                style = "error",
+                header = "Cayo heist",
+                message = Lang.cayoheist_wrongKey
+            })
+        end
+    end
+
+    TriggerServerEvent("plouffe_cayorobbery:unlockDoor", door, Cyr.Utils.MyAuthKey)
+
+    Utils:PlayAnim(1000, "anim@mp_player_intmenu@key_fob@","fob_click",48,2.0, 2.0, 500)
+end
+exports("TryUnlockDoor", Cyr.TryUnlockDoor)
 
 function Animation.Cutting:Prepare()
     RequestScriptAudioBank("DLC_HEI4/DLCHEI4_GENERIC_01", false, -1)

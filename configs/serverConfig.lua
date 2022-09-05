@@ -1,6 +1,3 @@
-Auth = exports.plouffe_lib:Get("Auth")
-Utils = exports.plouffe_lib:Get("Utils")
-
 Server = {
 	ready = false,
 }
