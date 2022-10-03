@@ -608,7 +608,7 @@ end
 exports("TryUnlockDoor", Cyr.TryUnlockDoor)
 
 function Animation.Cutting:Prepare()
-    RequestScriptAudioBank("DLC_HEI4/DLCHEI4_GENERIC_01", false, -1)
+    RequestScriptAudioBank("DLC_HEI4/DLCHEI4_GENERIC_01", false)
 
     local animLoaded = Utils:AssureAnim(self.dict, true)
     local fxLoaded = Utils:AssureFxAsset(self.ptfxAsset, true)
