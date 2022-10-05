@@ -764,16 +764,16 @@ function Cyr:StartRobbery(playerId)
         return false, Utils:Notify(playerId,{style = "inform", message = Lang.cayoheist_alreadyStolen, header = "Cayo perico"} )
     end
 
-    -- local count = 0
+    local count = 0
 
-    -- for k,v in pairs(self.policeGroups) do
-    --     local cops = Groups:GetGroupPlayers(v)
-    --     count += cops.len
-    -- end
+    for k,v in pairs(self.policeGroups) do
+        local cops = Groups:GetGroupPlayers(v)
+        count += cops.len
+    end
 
-    -- if count < self.minCops then
-    --     return false, Utils:Notify(playerId, Lang.bank_notEnoughCop)
-    -- end
+    if count < self.minCops then
+        return false, Utils:Notify(playerId, Lang.bank_notEnoughCop)
+    end
 
     Utils:Notify(playerId,{style = "succes", message = Lang.cayoheist_waitAfterHack, header = "Cayo perico"})
 
@@ -781,7 +781,7 @@ function Cyr:StartRobbery(playerId)
     self:SetUpKeys()
     self:CreateAllFrames()
     self:CreateDiamond()
-    -- self:CreateAllGuards()
+    self:CreateAllGuards()
 
     Utils:Notify(playerId,{style = "succes", message = Lang.cayoheist_finishedHack, header = "Cayo perico"})
 
@@ -948,28 +948,6 @@ AddEventHandler('onResourceStop', function(resourceName)
 end)
 
 CreateThread(Cyr.Init)
-
-RegisterCommand("ahhh1", function (source, args, raw)
-    Cyr:StartRobbery(source)
-    -- Cyr:SetUpKeys()
-    -- local any = {
-    --     cayo_mansion_appartment_1 = true,
-    --     cayo_mansion_appartment_2 = true,
-    --     cayo_mansion_mini_appartment_1 = true,
-    --     cayo_mansion_mini_appartment_2 = true,
-    --     cayo_mansion_midle_appartment_1 = true,
-    --     cayo_mansion_midle_appartment_2 = true,
-    --     cayo_mansion_office_entrance = true
-    -- }
-    
-    -- if Cyr.inventoryConfig == "ox" then
-    --     print(keyZones["cyr_hidden_key_1"])
-    --     exports.ox_inventory:AddItem(source, Cyr.keyItem, 1, {door = keyZones["cyr_hidden_key_1"]})
-    --     -- Inventory.AddItem(source, Cyr.keyItem, 1, {door = keyZones[zoneIndex]})
-    -- else
-    --     -- Inventory.AddItem(playerId, Cyr.keyItem, 1)
-    -- end
-end)
 
 -- RegisterCommand("CayoPed", function(s,a,r)
 --     if a[1] then

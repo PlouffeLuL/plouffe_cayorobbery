@@ -565,7 +565,7 @@ end
 exports("TryHack", Cyr.TryHack)
 
 function Cyr.TryUnlockDoor(data, data2)
-    data = data.metadata and data or data2.metadata
+    data = data.metadata and data or data2.metadata and data2
     if GlobalState.cayoRobberyState ~= "Started" then
         return
     end
