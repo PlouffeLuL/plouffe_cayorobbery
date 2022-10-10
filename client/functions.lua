@@ -124,7 +124,7 @@ function Cyr:Start()
 end
 
 function Cyr:RegisterEvents()
-    Utils:RegisterNetEvent("plouffe_cayorobbery:setGuardsTasks", self.UpdateGuardTask)
+    Utils.RegisterNetEvent("plouffe_cayorobbery:setGuardsTasks", self.UpdateGuardTask)
 
     AddEventHandler("plouffe_cayorobbery:onZone", function(params)
         if self[params.fnc] then
@@ -158,7 +158,7 @@ end
 
 function Cyr.HandleState(bagName,key,value,reserved,replicated)
     if value == "Started" then
-        aiPeds = Utils:GetPeds()
+        aiPeds = Utils.GetPeds()
         for k,v in pairs(Cyr.HiddenZones) do
             local registered, reason = exports.plouffe_lib:Register(v)
         end
@@ -177,7 +177,7 @@ function Cyr.UpdateGuardTask(list)
     for k,v in pairs(Cyr.Guards.coords) do
         local ped = NetworkGetEntityFromNetworkId(list[current])
 
-        Utils:AssureEntityControl(ped)
+        Utils.AssureEntityControl(ped)
 
         SetEntityCoords(ped, v.x, v.y, v.z - 1.0)
         FreezeEntityPosition(ped, false)
@@ -230,7 +230,7 @@ function Cyr.InMansion()
     Cyr.inMansion = true
 
     if not aiPeds then
-        aiPeds = Utils:GetPeds()
+        aiPeds = Utils.GetPeds()
     end
 
     while Cyr.inMansion do
@@ -298,7 +298,7 @@ function Cyr.RobArt()
         return
     end
 
-    if Utils:GetItemCount("WEAPON_SWITCHBLADE") < 1 then
+    if Utils.GetItemCount("WEAPON_SWITCHBLADE") < 1 then
         return Interface.Notifications.Show({
             style = "error",
             header = "Cayo heist",
@@ -425,7 +425,7 @@ function Cyr.RobJewel()
         return
     end
 
-    if Utils:GetItemCount(Cyr.glassCutterItem) < 1 then
+    if Utils.GetItemCount(Cyr.glassCutterItem) < 1 then
         return
     end
 
@@ -517,7 +517,7 @@ end
 exports("TryElevatorHack", Cyr.TryElevatorHack)
 
 function Cyr.TryHack()
-    if Utils:GetItemCount(Cyr.hackItem) < 1 then
+    if Utils.GetItemCount(Cyr.hackItem) < 1 then
         return
     end
 
@@ -604,15 +604,15 @@ function Cyr.TryUnlockDoor(data, data2)
 
     TriggerServerEvent("plouffe_cayorobbery:unlockDoor", door, Cyr.Utils.MyAuthKey)
 
-    Utils:PlayAnim(1000, "anim@mp_player_intmenu@key_fob@","fob_click",48,2.0, 2.0, 500)
+    Utils.PlayAnim(1000, "anim@mp_player_intmenu@key_fob@","fob_click",48,2.0, 2.0, 500)
 end
 exports("TryUnlockDoor", Cyr.TryUnlockDoor)
 
 function Animation.Cutting:Prepare()
     RequestScriptAudioBank("DLC_HEI4/DLCHEI4_GENERIC_01", false)
 
-    local animLoaded = Utils:AssureAnim(self.dict, true)
-    local fxLoaded = Utils:AssureFxAsset(self.ptfxAsset, true)
+    local animLoaded = Utils.AssureAnim(self.dict, true)
+    local fxLoaded = Utils.AssureFxAsset(self.ptfxAsset, true)
 
     self.ped = PlayerPedId()
     self.pedCoords = GetEntityCoords(self.ped)
@@ -629,7 +629,7 @@ function Animation.Cutting:Prepare()
 
     self.displayEntity = GetClosestObjectOfType(self.pedCoords.x, self.pedCoords.y, self.pedCoords.z, 1.0, -1714533217, false, false, false)
 
-    Utils:AssureEntityControl(self.displayEntity)
+    Utils.AssureEntityControl(self.displayEntity)
 
     self.displayEntityCoords = GetEntityCoords(self.displayEntity)
     self.displayEntityRotation = GetEntityRotation(self.displayEntity)
@@ -647,10 +647,10 @@ function Animation.Cutting:Prepare()
 
     self.pedRotation = GetEntityRotation(self.ped)
 
-    self.bagEntity =  Utils:CreateProp("hei_p_m_bag_var22_arm_s",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 4.0}, nil, true, true)
-    self.glassEntity =  Utils:CreateProp("h4_prop_h4_glass_cut_01a",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 5.0}, nil, true, true)
-    self.cutterEntity = Utils:CreateProp("h4_prop_h4_cutter_01a",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 6.0}, nil, true, true)
-    self.newDisplayEntity = Utils:CreateProp("h4_prop_h4_glass_disp_01b",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 8.0}, nil, true, true)
+    self.bagEntity =  Utils.CreateProp("hei_p_m_bag_var22_arm_s",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 4.0}, nil, true, true)
+    self.glassEntity =  Utils.CreateProp("h4_prop_h4_glass_cut_01a",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 5.0}, nil, true, true)
+    self.cutterEntity = Utils.CreateProp("h4_prop_h4_cutter_01a",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 6.0}, nil, true, true)
+    self.newDisplayEntity = Utils.CreateProp("h4_prop_h4_glass_disp_01b",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 8.0}, nil, true, true)
 
     SetEntityCollision(self.newDisplayEntity, false, true)
     SetEntityCollision(self.bagEntity, false, true)
@@ -808,8 +808,8 @@ function Animation.Cutting:Finished()
 end
 
 function Animation.Art:Prepare()
-    Utils:AssureAnim(self.dict, true)
-    Utils:AssureAnim("anim@heists@ornate_bank@hack", true)
+    Utils.AssureAnim(self.dict, true)
+    Utils.AssureAnim("anim@heists@ornate_bank@hack", true)
 
     self.ped = PlayerPedId()
     self.pedCoords = GetEntityCoords(self.ped)
@@ -831,8 +831,8 @@ function Animation.Art:Prepare()
 
     self.pedRotation = GetEntityRotation(self.ped)
 
-    self.bagEntity =  Utils:CreateProp("hei_p_m_bag_var22_arm_s",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 4.0}, nil, true, true)
-    self.bladeEntity =  Utils:CreateProp("w_me_switchblade",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 5.0}, nil, true, true)
+    self.bagEntity =  Utils.CreateProp("hei_p_m_bag_var22_arm_s",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 4.0}, nil, true, true)
+    self.bladeEntity =  Utils.CreateProp("w_me_switchblade",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 5.0}, nil, true, true)
 
     SetEntityCollision(self.bagEntity, false, true)
     SetEntityCollision(self.bladeEntity, false, true)
@@ -1081,7 +1081,7 @@ function Animation.Art:Finished()
 end
 
 function Animation.Hack:Prepare()
-    local animLoaded = Utils:AssureAnim(self.dict, true)
+    local animLoaded = Utils.AssureAnim(self.dict, true)
 
     self.ped = PlayerPedId()
     self.pedCoords = GetEntityCoords(self.ped)
@@ -1095,8 +1095,8 @@ function Animation.Hack:Prepare()
 
     self.offset = GetOffsetFromEntityInWorldCoords(self.connectorEntity, 0.018, 0.010, 0.0)
 
-    self.usbEntity =  Utils:CreateProp("ch_prop_ch_usb_drive01x",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 4.0}, nil, true, true)
-    self.phoneEntity =  Utils:CreateProp("prop_phone_ing",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 5.0}, nil, true, true)
+    self.usbEntity =  Utils.CreateProp("ch_prop_ch_usb_drive01x",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 4.0}, nil, true, true)
+    self.phoneEntity =  Utils.CreateProp("prop_phone_ing",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 5.0}, nil, true, true)
 
     SetEntityCollision(self.usbEntity, false, true)
     SetEntityCollision(self.phoneEntity, false, true)
@@ -1195,7 +1195,7 @@ function Animation.Hack:Finished()
 end
 
 function Animation.Laptop:Prepare()
-    local animLoaded = Utils:AssureAnim(self.dict, true)
+    local animLoaded = Utils.AssureAnim(self.dict, true)
 
     self.ped = PlayerPedId()
     self.pedCoords = GetEntityCoords(self.ped)
@@ -1203,9 +1203,9 @@ function Animation.Laptop:Prepare()
 
     self.offset = GetOffsetFromEntityInWorldCoords(self.ped, 0.0, 0.8, 0.4)
 
-    self.bagEntity =  Utils:CreateProp("hei_p_m_bag_var22_arm_s",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 5.0}, nil, true, true)
-    self.laptopEntity =  Utils:CreateProp("hei_prop_hst_laptop",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 8.0}, nil, true, true)
-    self.cardEntity =  Utils:CreateProp("hei_prop_heist_card_hack_02",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 10.0}, nil, true, true)
+    self.bagEntity =  Utils.CreateProp("hei_p_m_bag_var22_arm_s",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 5.0}, nil, true, true)
+    self.laptopEntity =  Utils.CreateProp("hei_prop_hst_laptop",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 8.0}, nil, true, true)
+    self.cardEntity =  Utils.CreateProp("hei_prop_heist_card_hack_02",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 10.0}, nil, true, true)
 
     SetEntityCollision(self.bagEntity, false, true)
     SetEntityCollision(self.laptopEntity, false, true)
@@ -1285,10 +1285,10 @@ function Animation.Laptop:Finished()
 end
 
 function Animation.Thermal:Prepare()
-    Utils:AssureAnim(self.dict, true)
+    Utils.AssureAnim(self.dict, true)
 
     for k,v in pairs(self.ptfxAsset) do
-        Utils:AssureFxAsset(v, true)
+        Utils.AssureFxAsset(v, true)
     end
 
     self.ped = PlayerPedId()
@@ -1297,9 +1297,9 @@ function Animation.Thermal:Prepare()
     self.boneIndex = GetPedBoneIndex(self.ped, 28422)
     self.offset = GetOffsetFromEntityInWorldCoords(self.ped, 0.3, 0.4, 0.1)
 
-    self.bagEntity =  Utils:CreateProp("hei_p_m_bag_var22_arm_s",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 5.0}, nil, true, true)
-    self.bombEntity =  Utils:CreateProp("hei_prop_heist_thermite",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 8.0}, nil, true, true)
-    self.flashingBombEntity =  Utils:CreateProp("hei_prop_heist_thermite_flash",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 9.0}, nil, true, true)
+    self.bagEntity =  Utils.CreateProp("hei_p_m_bag_var22_arm_s",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 5.0}, nil, true, true)
+    self.bombEntity =  Utils.CreateProp("hei_prop_heist_thermite",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 8.0}, nil, true, true)
+    self.flashingBombEntity =  Utils.CreateProp("hei_prop_heist_thermite_flash",  {x = self.offset.x, y = self.offset.y, z = self.offset.z - 9.0}, nil, true, true)
 
     SetEntityCollision(self.bagEntity, false, true)
     SetEntityCollision(self.bombEntity, false, true)

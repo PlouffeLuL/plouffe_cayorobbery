@@ -382,7 +382,7 @@ function Cyr.Init()
 
     Cyr.ValidateConfig()
 
-    Utils:CreateDepencie("plouffe_doorlock", Cyr.ExportsAllDoors)
+    Utils.CreateDepencie("plouffe_doorlock", Cyr.ExportsAllDoors)
     Cyr:RelockAllDoors()
     GlobalState.cayoRobberyState = "Ready"
     Server.ready = true
@@ -472,7 +472,7 @@ end
 
 function Cyr.LoadPlayer()
     local playerId = source
-    local registred, key = Auth:Register(playerId)
+    local registred, key = Auth.Register(playerId)
 
     while not Server.ready do
         Wait(100)
@@ -490,7 +490,7 @@ end
 function Cyr.PlayerRobbedPainting(netId, authkey)
     local playerId = source
 
-    if not Auth:Validate(playerId,authkey) or not Auth:Events(playerId,"plouffe_cayorobbery:paintingLooted") then
+    if not Auth.Validate(playerId,authkey) or not Auth.Events(playerId,"plouffe_cayorobbery:paintingLooted") then
         return
     end
 
@@ -520,7 +520,7 @@ end
 function Cyr.DestroyPainting(netId, authkey)
     local playerId = source
 
-    if not Auth:Validate(playerId,authkey) or not Auth:Events(playerId,"plouffe_cayorobbery:destroyPainting") then
+    if not Auth.Validate(playerId,authkey) or not Auth.Events(playerId,"plouffe_cayorobbery:destroyPainting") then
         return
     end
 
@@ -545,7 +545,7 @@ end
 function Cyr.PlayerLootedDiamond(netId, authkey)
     local playerId = source
 
-    if not Auth:Validate(playerId,authkey) or not Auth:Events(playerId,"plouffe_cayorobbery:LootedDiamond") then
+    if not Auth.Validate(playerId,authkey) or not Auth.Events(playerId,"plouffe_cayorobbery:LootedDiamond") then
         return
     end
 
@@ -570,7 +570,7 @@ end
 function Cyr.DestroyJewel(netId, authkey)
     local playerId = source
 
-    if not Auth:Validate(playerId,authkey) or not Auth:Events(playerId,"plouffe_cayorobbery:destroyJewel") then
+    if not Auth.Validate(playerId,authkey) or not Auth.Events(playerId,"plouffe_cayorobbery:destroyJewel") then
         return
     end
 
@@ -593,7 +593,7 @@ end
 function Cyr.LootKey(zoneIndex, authkey)
     local playerId = source
 
-    if not Auth:Validate(playerId,authkey) or not Auth:Events(playerId,"plouffe_cayorobbery:lootkey") then
+    if not Auth.Validate(playerId,authkey) or not Auth.Events(playerId,"plouffe_cayorobbery:lootkey") then
         return
     end
 
@@ -609,7 +609,7 @@ end
 function Cyr.ElevatorHack(success, authkey)
     local playerId = source
 
-    if not Auth:Validate(playerId,authkey) or not Auth:Events(playerId,"plouffe_cayorobbery:hacked_elevator") then
+    if not Auth.Validate(playerId,authkey) or not Auth.Events(playerId,"plouffe_cayorobbery:hacked_elevator") then
         return
     end
 
@@ -629,7 +629,7 @@ end
 function Cyr.PlayerThermalGate(success, doorIndex, authkey)
     local playerId = source
 
-    if not Auth:Validate(playerId,authkey) or not Auth:Events(playerId,"plouffe_cayorobbery:gate_thermal") then
+    if not Auth.Validate(playerId,authkey) or not Auth.Events(playerId,"plouffe_cayorobbery:gate_thermal") then
         return
     end
 
@@ -643,7 +643,7 @@ end
 function Cyr.RemoveItem(item, amount, authkey)
     local playerId = source
 
-    if not Auth:Validate(playerId,authkey) or not Auth:Events(playerId,"plouffe_cayorobbery:removeItem") then
+    if not Auth.Validate(playerId,authkey) or not Auth.Events(playerId,"plouffe_cayorobbery:removeItem") then
         return
     end
 
@@ -761,21 +761,21 @@ function Cyr:StartRobbery(playerId)
     local startTime = os.time()
 
     if GlobalState.cayoRobberyState ~= "Ready" then
-        return false, Utils:Notify(playerId,{style = "inform", message = Lang.cayoheist_alreadyStolen, header = "Cayo perico"} )
+        return false, Utils.Notify(playerId,{style = "inform", message = Lang.cayoheist_alreadyStolen, header = "Cayo perico"} )
     end
 
     local count = 0
 
     for k,v in pairs(self.policeGroups) do
-        local cops = Groups:GetGroupPlayers(v)
+        local cops = Groups.GetGroupPlayers(v)
         count += cops.len
     end
 
     if count < self.minCops then
-        return false, Utils:Notify(playerId, Lang.bank_notEnoughCop)
+        return false, Utils.Notify(playerId, Lang.bank_notEnoughCop)
     end
 
-    Utils:Notify(playerId,{style = "succes", message = Lang.cayoheist_waitAfterHack, header = "Cayo perico"})
+    Utils.Notify(playerId,{style = "succes", message = Lang.cayoheist_waitAfterHack, header = "Cayo perico"})
 
     self:RelockAllDoors()
     self:SetUpKeys()
@@ -783,7 +783,7 @@ function Cyr:StartRobbery(playerId)
     self:CreateDiamond()
     self:CreateAllGuards()
 
-    Utils:Notify(playerId,{style = "succes", message = Lang.cayoheist_finishedHack, header = "Cayo perico"})
+    Utils.Notify(playerId,{style = "succes", message = Lang.cayoheist_finishedHack, header = "Cayo perico"})
 
     CreateThread(function()
         local sleepTimer = 1000 * 30
@@ -811,7 +811,7 @@ end
 function Cyr.UnlockDoor(doorIndex, doorType, authkey)
     local playerId = source
 
-    if not Auth:Validate(playerId,authkey) or not Auth:Events(playerId,"plouffe_cayorobbery:doorHacked") then
+    if not Auth.Validate(playerId,authkey) or not Auth.Events(playerId,"plouffe_cayorobbery:doorHacked") then
        return
     end
 
@@ -853,7 +853,7 @@ function Cyr:SetUpKeys()
     local usedRandi = {}
 
     for k,v in pairs(self.KeysMeta) do
-        local len = Utils:TableLen(self.HiddenZones)
+        local len = Utils.TableLen(self.HiddenZones)
         local randi = math.random(1, len)
 
         repeat
@@ -871,7 +871,7 @@ end
 function Cyr.UsedKey(zoneIndex, authkey)
     local playerId = source
 
-    if not Auth:Validate(playerId,authkey) or not Auth:Events(playerId,"plouffe_cayorobbery:unlockDoor") then
+    if not Auth.Validate(playerId,authkey) or not Auth.Events(playerId,"plouffe_cayorobbery:unlockDoor") then
         return
     end
 
